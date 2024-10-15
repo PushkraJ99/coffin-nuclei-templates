@@ -1,0 +1,177 @@
+id: backupfiles
+
+info:
+  name: Compressed Backup File - Detect
+  author: toufik-airane,dwisiswant0,ffffffff0x,pwnhxl,mastercho,PushkraJ99 
+  severity: medium
+  description: Multiple compressed backup files were detected.
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+    cvss-score: 5.3
+    cwe-id: CWE-200
+  metadata:
+    max-request: 1305
+  tags: exposure,backup
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/{{FILENAME}}.{{EXT}}"
+
+    attack: clusterbomb
+    payloads:
+      FILENAME:
+        - "{{FQDN}}"
+        - "{{RDN}}"
+        - "{{DN}}"
+        - "{{SD}}"
+        - "{{date_time('%Y')}}"
+        - "ROOT"
+        - "wwwroot"
+        - "htdocs"
+        - "www"
+        - "html"
+        - "web"
+        - "webapps"
+        - "public"
+        - "public_html"
+        - "uploads"
+        - "website"
+        - "api"
+        - "test"
+        - "app"
+        - "backup"
+        - "backup_1"
+        - "backup_2"
+        - "backup_3"
+        - "backup_4"
+        - "backups"
+        - "bin"
+        - "temp"
+        - "bak"
+        - "db"
+        - "sql"
+        - "dump"
+        - "database"
+        - "Release"
+        - "inetpub"
+        - "package"
+        - "tmp"
+        - "data"
+        - "ftp"
+        - "output"
+        - "admin"
+        - "upload"
+        - "src"
+        - "conf/conf"
+        - "old"
+        - "config"
+        - "settings"
+        - "restore"
+        - "archives"
+        - "snapshot"
+        - "logs"
+        - "versions"
+        - "system"
+        - "local"
+        - "assets"
+        - "backup_full"
+        - "backup_incremental"
+        - "backup_daily"
+        - "backup_weekly"
+        - "backup_monthly"
+        - "full_backup"
+        - "incremental_backup"
+        - "backup_2023"
+        - "backup_2022"
+        - "backup_2021"
+        - "recent_backup"
+        - "old_backup"
+        - "historical_backup"
+        - "project_backup"
+        - "data_backup"
+        - "server_backup"
+        - "user_backup"
+        - "site_backup"
+        - "export"
+        - "import"
+        - "backup_data"
+        - "file_backup"
+        - "folder_backup"
+        - "media_backup"
+        - "config_backup"
+        - "app_backup"
+        - "source_backup"
+        - "template_backup"
+
+      EXT:
+        - "tar"
+        - "7z"
+        - "bz2"
+        - "gz"
+        - "lz"
+        - "rar"
+        - "tar.gz"
+        - "tar.bz2"
+        - "xz"
+        - "zip"
+        - "z"
+        - "Z"
+        - "tar.z"
+        - "tgz"
+        - "db"
+        - "jar"
+        - "sqlite"
+        - "sqlitedb"
+        - "sql.7z"
+        - "sql.bz2"
+        - "sql.gz"
+        - "sql.lz"
+        - "sql.rar"
+        - "sql.tar.gz"
+        - "sql.xz"
+        - "sql.zip"
+        - "sql.z"
+        - "sql.tar.z"
+        - "war"
+        - "bak"           # Additional extension
+        - "backup.zip"    # Specific backup extension
+        - "backup.tar"    # Specific backup extension
+        - "backup.tgz"    # Specific backup extension
+        - "backup.sql"    # Specific backup extension
+        - "tar.bz"        # Alternative tar extension
+        - "tgz.bz"        # Compressed tgz
+        - "tar.lz"        # LZ compressed tar
+        - "backup.7z"     # Specific backup extension
+        - "backup.gz"     # Specific backup extension
+
+    max-size: 500 # Size in bytes - Max Size to read from server response
+
+    matchers-condition: and
+    matchers:
+      - type: binary
+        binary:
+          - "7573746172202000" # tar
+          - "7573746172003030" # tar
+          - "377ABCAF271C" # 7z
+          - "314159265359" # bz2
+          - "53514c69746520666f726d6174203300" # SQLite format 3.
+          - "1f8b" # gz tar.gz
+          - "526172211A0700" # rar RAR archive version 1.50
+          - "526172211A070100" # rar RAR archive version 5.0
+          - "FD377A585A0000" # xz tar.xz
+          - "1F9D" # z tar.z
+          - "1FA0" # z tar.z
+          - "4C5A4950" # lz
+          - "504B0304" # zip
+        condition: or
+        part: body
+
+      - type: regex
+        regex:
+          - "application/[-\\w.]+" # Content-type regex
+        part: header
+
+      - type: status
+        status:
+          - 200
